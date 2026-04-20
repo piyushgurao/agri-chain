@@ -3,6 +3,7 @@ import ApiResponse from "../utils/ApiResponse.js"
 import ApiError from "../utils/ApiError.js"
 import asyncHandler from "../utils/asyncHandler.js"
 import generateQRCode from "../utils/qrGenerator.js"
+import { recordOnBlockchain } from "../utils/blockchain.js"
 
 // -----------------------------------------------
 // CREATE BATCH
@@ -50,15 +51,29 @@ export const createBatch = asyncHandler(async (req, res) => {
   // Step 4 — add timeline entry
   // blockchain hash is empty for now
   // we will add blockchain integration later
+
+  // Step 4 — record on blockchain
+const blockchainHash = await recordOnBlockchain(
+  batch.batchId,
+  "farmer",
+  req.user.name,
+  "batch_created"
+)
+// if blockchain fails → returns "" → app still works ✅
+
+// Step 5 — add timeline entry with hash
   batch.qrCode = qrCode
-  batch.timeline.push({
-    stage: "farmer",
-    message: `Batch created by farmer ${req.user.name}`,
-    updatedBy: req.user.name,
-    blockchainHash: "",
-    blockchainStatus: "pending",
-    timestamp: new Date(),
-  })
+  batch.latestBlockchainHash = blockchainHash
+
+
+ batch.timeline.push({
+  stage:           "farmer",
+  message:         `Batch created by farmer ${req.user.name}`,
+  updatedBy:       req.user.name,
+  blockchainHash:  blockchainHash,
+  blockchainStatus: blockchainHash ? "confirmed" : "pending",
+  timestamp:       new Date(),
+})
 
   // Step 5 — save updated batch
   await batch.save()
@@ -119,19 +134,28 @@ export const updateProcessor = asyncHandler(async (req, res) => {
     completedAt: new Date(),
   }
 
+  // After updating batch.processor
+// Add blockchain recording:
+const blockchainHash = await recordOnBlockchain(
+  batch.batchId,
+  "processor",
+  req.user.name,
+  "batch_processed"
+)
+
   // Step 5 — move to next stage
   batch.currentStage = "processor"
+  batch.latestBlockchainHash = blockchainHash
 
   // Step 6 — add timeline entry
-  batch.timeline.push({
-    stage: "processor",
-    message: `Batch processed by ${req.user.name} at ${facilityName}`,
-    updatedBy: req.user.name,
-    blockchainHash: "",
-    blockchainStatus: "pending",
-    timestamp: new Date(),
-  })
-
+ batch.timeline.push({
+  stage:            "processor",
+  message:          `Batch processed by ${req.user.name} at ${facilityName}`,
+  updatedBy:        req.user.name,
+  blockchainHash:   blockchainHash,
+  blockchainStatus: blockchainHash ? "confirmed" : "pending",
+  timestamp:        new Date(),
+})
   // Step 7 — save
   await batch.save()
 
@@ -191,18 +215,28 @@ export const updateWarehouse = asyncHandler(async (req, res) => {
     completedAt: new Date(),
   }
 
+  const blockchainHash = await recordOnBlockchain(
+  batch.batchId,
+  "warehouse",
+  req.user.name,
+  "batch_stored"
+)
+
+
   // Step 5 — move to next stage
   batch.currentStage = "warehouse"
 
+  batch.latestBlockchainHash = blockchainHash
+
   // Step 6 — add timeline entry
   batch.timeline.push({
-    stage: "warehouse",
-    message: `Batch stored at ${warehouseName} by ${req.user.name}`,
-    updatedBy: req.user.name,
-    blockchainHash: "",
-    blockchainStatus: "pending",
-    timestamp: new Date(),
-  })
+  stage:            "warehouse",
+  message:          `Batch stored at ${warehouseName} by ${req.user.name}`,
+  updatedBy:        req.user.name,
+  blockchainHash:   blockchainHash,
+  blockchainStatus: blockchainHash ? "confirmed" : "pending",
+  timestamp:        new Date(),
+})
 
   // Step 7 — save
   await batch.save()
@@ -263,18 +297,27 @@ export const updateRetailer = asyncHandler(async (req, res) => {
     completedAt: new Date(),
   }
 
+const blockchainHash = await recordOnBlockchain(
+  batch.batchId,
+  "retailer",
+  req.user.name,
+  "batch_received"
+)
+
   // Step 5 — move to next stage
   batch.currentStage = "retailer"
 
+  batch.latestBlockchainHash = blockchainHash
+
   // Step 6 — add timeline entry
   batch.timeline.push({
-    stage: "retailer",
-    message: `Batch received by ${storeName}`,
-    updatedBy: req.user.name,
-    blockchainHash: "",
-    blockchainStatus: "pending",
-    timestamp: new Date(),
-  })
+  stage:            "retailer",
+  message:          `Batch received by ${storeName}`,
+  updatedBy:        req.user.name,
+  blockchainHash:   blockchainHash,
+  blockchainStatus: blockchainHash ? "confirmed" : "pending",
+  timestamp:        new Date(),
+})
 
   // Step 7 — save
   await batch.save()
@@ -306,17 +349,25 @@ export const markAsSold = asyncHandler(async (req, res) => {
     throw new ApiError(403, "Only the retailer who received this batch can mark it as sold")
   }
 
+  const blockchainHash = await recordOnBlockchain(
+  batch.batchId,
+  "retailer",
+  req.user.name,
+  "batch_sold"
+)
+
   batch.retailer.isSold = true
   batch.currentStage = "completed"
+  batch.latestBlockchainHash = blockchainHash
 
   batch.timeline.push({
-    stage: "retailer",
-    message: `Batch marked as sold by ${req.user.name}`,
-    updatedBy: req.user.name,
-    blockchainHash: "",
-    blockchainStatus: "pending",
-    timestamp: new Date(),
-  })
+  stage:            "retailer",
+  message:          `Batch marked as sold by ${req.user.name}`,
+  updatedBy:        req.user.name,
+  blockchainHash:   blockchainHash,
+  blockchainStatus: blockchainHash ? "confirmed" : "pending",
+  timestamp:        new Date(),
+})
 
   await batch.save()
 
