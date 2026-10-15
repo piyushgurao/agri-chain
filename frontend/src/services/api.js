@@ -21,4 +21,31 @@ export const updateWarehouse = (batchId, data)  => api.put(`/batch/warehouse/${b
 export const updateRetailer  = (batchId, data)  => api.put(`/batch/retailer/${batchId}`, data)
 export const markAsSold      = (batchId)        => api.put(`/batch/retailer/${batchId}/sold`)
 
+// ─── Listings ───
+export const createListing      = (data)         => api.post("/listings/create", data)
+export const getAllListings      = (params)       => api.get("/listings", { params })
+export const getListingById     = (id)           => api.get(`/listings/${id}`)
+export const getMyListings      = ()             => api.get("/listings/my/listings")
+export const updateListingPrice = (id, data)     => api.put(`/listings/${id}/price`, data)
+export const cancelListing      = (id)           => api.put(`/listings/${id}/cancel`)
+export const getMandiPrices     = (crop, state)  => api.get("/listings/mandi-prices", { params: { crop, state } })
+
+// ─── Chat ───
+export const startConversation    = (data)           => api.post("/chat/start", data)
+export const getMyConversations   = ()               => api.get("/chat/conversations")
+export const getMessages          = (conversationId) => api.get(`/chat/${conversationId}/messages`)
+export const sendMessage          = (conversationId, data) => api.post(`/chat/${conversationId}/send`, data)
+export const acceptPriceOffer     = (conversationId, data) => api.put(`/chat/${conversationId}/accept-price`, data)
+
+// ─── Orders ───
+export const initiateOrder      = (data)      => api.post("/orders/initiate", data)
+export const verifyPayment      = (data)      => api.post("/orders/verify-payment", data)
+export const getMyOrders        = ()          => api.get("/orders/my-orders")
+export const getFarmerOrders    = ()          => api.get("/orders/farmer-orders")
+export const updateOrderStatus  = (id, data) => api.put(`/orders/${id}/status`, data)
+export const rateOrder          = (id, data) => api.post(`/orders/${id}/rate`, data)
+
+
+
+
 export default api

@@ -9,6 +9,7 @@ const DEMO_USERS = [
   { role: "🏭 Processor", email: "processor@test.com" },
   { role: "🏢 Warehouse", email: "warehouse@test.com" },
   { role: "🏪 Retailer",  email: "retailer@test.com" },
+  { role: "🛒 Buyer",     email: "buyer@test.com" },
   { role: "👑 Admin",     email: "admin@agrichain.com" },
 ]
 

@@ -16,6 +16,7 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "axios": "^1.20.0",
     "bcryptjs": "^3.0.3",
     "cookie-parser": "^1.4.7",
     "cors": "^2.8.6",
@@ -24,9 +25,14 @@
     "express": "^5.2.1",
     "jsonwebtoken": "^9.0.3",
     "mongoose": "^9.4.1",
-    "qrcode": "^1.5.4"
+    "node-cron": "^4.6.0",
+    "qrcode": "^1.5.4",
+    "razorpay": "^2.9.8",
+    "socket.io": "^4.8.4"
   },
-  "devDependencies": {
-    "nodemon": "^3.1.14"
+  "overrides": {
+    "chokidar@^3": [
+      []
+    ]
   }
 }

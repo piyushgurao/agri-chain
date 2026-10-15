@@ -9,6 +9,7 @@ const ROLES = [
   { value: "processor", emoji: "🏭", label: "Processor", desc: "Process and package batches" },
   { value: "warehouse", emoji: "🏢", label: "Warehouse", desc: "Manage batch storage" },
   { value: "retailer",  emoji: "🏪", label: "Retailer",  desc: "Receive and sell batches" },
+  { value: "buyer",     emoji: "🛒", label: "Buyer",     desc: "Buy directly from farmers" },
 ]
 
 const Register = () => {
